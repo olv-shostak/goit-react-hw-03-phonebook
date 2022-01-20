@@ -3,6 +3,7 @@ import { Container, Section, Title, TitleContacts } from './App.styled';
 import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
+import Notification from './Notification/Notification';
 
 class App extends React.Component {
   state = {
@@ -14,6 +15,19 @@ class App extends React.Component {
     ],
     filter: '',
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+
+  componentDidMount() {
+    const parseContacts = JSON.parse(localStorage.getItem('contacts'));
+    if (parseContacts) {
+      this.setState({ contacts: parseContacts });
+    }
+  }
 
   findContact = () => {
     return this.state.contacts.filter(contact =>
@@ -57,11 +71,15 @@ class App extends React.Component {
         </Section>
         <Section>
           <TitleContacts>Contacts</TitleContacts>
-          <Filter
-            filter={this.state.filter}
-            onChange={this.handlChange}
-            clear={this.clearFilterInput}
-          />
+          {this.state.contacts.length === 0 ? (
+            <Notification message="There is no any contact"></Notification>
+          ) : (
+            <Filter
+              filter={this.state.filter}
+              onChange={this.handlChange}
+              clear={this.clearFilterInput}
+            />
+          )}
           <ContactList find={this.findContact()} deleteContact={this.deleteContact}></ContactList>
         </Section>
       </Container>
